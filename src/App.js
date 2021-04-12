@@ -4,6 +4,8 @@ import AddIcon from '@material-ui/icons/Add';
 import { useDispatch, useSelector } from 'react-redux';
 import green from '@material-ui/core/colors/green';
 import Button from '@material-ui/core/Button';
+import { Notifications } from 'react-push-notification';
+import addNotification from 'react-push-notification';
 
 function App() {
 
@@ -11,20 +13,21 @@ function App() {
   const [walletName, setWalletName] = useState("");
   const [walletObj, setWalletObj] = useState({});
   const [click, setClick] = useState(false);
+  const [loading, setLoading] = useState(false);
   if (JSON.parse(localStorage.getItem('wallets')) === null) {
     const INITIAL_STATE = {
       wallets: [{
-          wallet_name: "",
-          wallet_amount: "",
-          wallet_nfts: []
+        wallet_name: "",
+        wallet_amount: "",
+        wallet_nfts: []
       }]
-  };
+    };
     localStorage.setItem('wallets', JSON.stringify(INITIAL_STATE));
   }
-  
+
   const walletsRedux = useSelector((state) => state.wallets);
-  
-  if (walletsRedux === null){
+
+  if (walletsRedux === null) {
     dispatch({ type: 'SET_REDUX', payload: "" });
   }
 
@@ -34,6 +37,34 @@ function App() {
       dispatch({ type: 'ADD_WALLET', payload: walletObj });
       setClick(false);
     }
+
+    const intervalId = setInterval(() => {
+      var localSt = JSON.parse(localStorage.getItem('wallets'));
+      localSt.wallets.forEach((wlt,index) => {
+        if (index > 0){
+          generateWallet(wlt.wallet_name).then(walletUpdate => {
+            if (walletUpdate.wallet_nfts.length > wlt.wallet_nfts.length || walletUpdate.wallet_amount > wlt.wallet_amount){
+              dispatch({ type: 'UPDATE_WALLET', payload: walletUpdate });  
+      
+              if (walletUpdate.wallet_nfts.length > wlt.wallet_nfts.length)
+              addNotification({
+                title: 'YAAAYY',
+                subtitle: 'You have mined a new NFT!',
+                message: `Card name: implementing | Wallet: ${walletUpdate.wallet_name}`,
+                theme: 'darkblue',
+            });
+            }
+          });
+        }
+      })
+
+    }, 5000)
+
+    return () => clearInterval(intervalId);
+
+
+
+
   }, [setWalletName, click, dispatch, walletObj]);
 
   const generateWallet = async (walletName) => {
@@ -41,6 +72,7 @@ function App() {
     const responseAmount = await fetch(`https://lightapi.eosamsterdam.net/api/balances/wax/${walletName}`);
     const dataResponseNFT = await responseNFT.json();
     const dataResponseAmount = await responseAmount.json();
+    
     var objReturn = {
       wallet_name: walletName,
       wallet_amount: dataResponseAmount.balances[0].amount,
@@ -74,9 +106,10 @@ function App() {
     dispatch({ type: 'DELETE_WALLET', payload: wlt });
     JSON.parse(localStorage.getItem('wallets'));
   }
-  
+
   return (
     <>
+      <Notifications />
       <h1>Alien Tools</h1>
       <TextField id="standard-basic" label="carteira" onChange={event => handleChange(event)} />
       <AddIcon style={{ color: green[500] }} fontSize="large" onClick={e => handleClick()} />

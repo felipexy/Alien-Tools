@@ -1,6 +1,15 @@
 import { createStore } from 'redux';
 import { combineReducers } from 'redux';
 
+const updateWallet = (wallets, updatedWallet) => {
+    wallets.forEach((wlt, index) => {
+        if (wlt.wallet_name === updatedWallet.wallet_name){
+            wallets[index] = updatedWallet;
+        }
+    })
+    return wallets;
+}
+
 function walletReducer(state = JSON.parse(localStorage.getItem('wallets')), action) {
     switch (action.type) {
         case 'SET_REDUX':
@@ -14,6 +23,14 @@ function walletReducer(state = JSON.parse(localStorage.getItem('wallets')), acti
             return {
                 wallets: [...state.wallets, action.payload]
             };
+        case 'UPDATE_WALLET':
+            state = JSON.parse(localStorage.getItem('wallets'))    
+            state.wallets = updateWallet(state.wallets, action.payload);
+            localStorage.setItem('wallets', JSON.stringify(state));
+            return {
+                ...state
+            };
+
         case 'DELETE_WALLET':
             state.wallets.forEach((wlt, index) => {
                 if (wlt.wallet_name === action.payload.wallet_name) {
@@ -21,7 +38,9 @@ function walletReducer(state = JSON.parse(localStorage.getItem('wallets')), acti
                 }
             })
             localStorage.setItem('wallets', JSON.stringify(state));
-            return {...state};
+            return {
+                ...state
+            };
         default:
             return state;
     }
