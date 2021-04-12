@@ -13,7 +13,6 @@ function App() {
   const [walletName, setWalletName] = useState("");
   const [walletObj, setWalletObj] = useState({});
   const [click, setClick] = useState(false);
-  const [loading, setLoading] = useState(false);
   if (JSON.parse(localStorage.getItem('wallets')) === null) {
     const INITIAL_STATE = {
       wallets: [{
