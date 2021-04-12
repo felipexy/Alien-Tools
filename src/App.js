@@ -24,7 +24,7 @@ function App() {
       dispatch({ type: 'ADD_WALLET', payload: walletObj });
       setClick(false);
     }
-  });
+  },[setWalletName, click, dispatch, walletObj]);
 
 
 
@@ -73,10 +73,10 @@ function App() {
       <AddIcon style={{ color: green[500] }} fontSize="large" onClick={e => handleClick()} />
       <div>
         {(walletParse[1] !== undefined) &&
-          walletParse.map((wlt, index) => {
+          walletParse.forEach((wlt, index) => {
             if (index !== 0) {
               var arrayUrls = []
-              wlt.wallet_nfts.map((nft, indexnft) => {
+              wlt.wallet_nfts.forEach((nft, indexnft) => {
                 const image = walletParse[index].wallet_nfts[indexnft].data.img;
                 const imgURL = `https://ipfs.atomichub.io/ipfs/${image}`
                 arrayUrls.push(imgURL);
@@ -88,7 +88,7 @@ function App() {
                   <p>TLM amount: {wlt.wallet_amount}</p>
                   {arrayUrls.map(url => {
                     return (
-                      <img class="picture" src={url} width="121" height="155" />
+                      <img class="picture" alt="" src={url} width="121" height="155" />
                     )
                   })}
                 </>
